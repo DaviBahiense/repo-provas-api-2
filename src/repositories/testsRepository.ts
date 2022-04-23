@@ -73,6 +73,42 @@ export async function createTeacherDiscipline(teacher, discipline) {
     return newTeacherDiscipline.id
 }
 
-export async function insertTeacherDiscipline(teacher, discipline) {
+export async function newCategory(category) {
+    const [newCategory] = await prisma.$transaction([  
+        prisma.categories.create({
+        data:{ name:category }
+    })]);
+    return newCategory.id
+}
+
+export async function findCategory(category) {
+    const categoryId = await prisma.categories.findFirst({
+        where:{  name: category  },
+        select: { id: true  }
+    })
+    if (categoryId) {return categoryId.id} else{return null}
+}
+
+export async function findTest(name, url, categoryId, teacherDisciplineId) {
     
+    const test = await prisma.tests.findFirst({
+        where:{  
+            name: name,
+            pdfUrl: url,
+            categoryId: categoryId,
+            teacherDisciplineId: teacherDisciplineId
+        }
+    })
+    return test
+}
+
+export async function createTest(name, url, categoryId, teacherDisciplineId) {
+        await prisma.tests.create({
+        data:{ 
+            name: name,
+            pdfUrl: url,
+            categoryId: categoryId,
+            teacherDisciplineId: teacherDisciplineId
+        }
+    });
 }

@@ -24,13 +24,25 @@ export async function teacherDiscipline(teacher, discipline, term) {
         newDisciplineId = await testsRepository.createDiscipline(discipline, foundIdTerm || newTermId) 
     };
    
-
     const foundTeacherDiscipline = await testsRepository.findTeacherDiscipline(foundIdTeacher || newTeacherId, foundIdDiscipline || newDisciplineId);
     let newTeacherDisciplineId : number
     if (!foundTeacherDiscipline) { newTeacherDisciplineId = await testsRepository.createTeacherDiscipline(foundIdTeacher || newTeacherId, foundIdDiscipline || newDisciplineId) }; 
 
+    return foundTeacherDiscipline || newTeacherDisciplineId
 }
 
-export async function create(name, url, category) {
-    
+export async function category(category) {
+    const foundCategoryId = await testsRepository.findCategory(category)
+    let newCategoryId
+    if (!foundCategoryId) { newCategoryId = await testsRepository.newCategory(category)}
+
+    return foundCategoryId || newCategoryId
+}
+
+export async function createTest(name, url, categoryId, teacherDisciplineId) {
+
+    const newTest = await testsRepository.findTest(name, url, categoryId, teacherDisciplineId)
+    if (newTest) throw {type: "conflict", message: "Prova já cadastrada"}
+
+    await testsRepository.createTest(name, url, categoryId, teacherDisciplineId)
 }
