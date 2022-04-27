@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
+model User {
   id       Int    @id @default(autoincrement())
   email    String @unique
   password String
@@ -18,65 +18,57 @@ model Users {
   @@map("users")
 }
 
-model Categories {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+model Teacher {
+  id                 Int                 @id @default(autoincrement())
+  name               String              @unique
+  teacherDisciplines TeacherDiscipline[]
 
-  Tests Tests[]
-  @@map("categories")
-}
-
-model Tests {
-  id     Int    @id @default(autoincrement())
-  name   String
-  pdfUrl String
-
-  categories Categories @relation(fields: [categoryId], references: [id])
-  categoryId Int
-
-  teacherDiscipline   TeachersDisciplines @relation(fields: [teacherDisciplineId], references: [id])
-  teacherDisciplineId Int
-
-  @@map("tests")
-}
-
-model TeachersDisciplines {
-  id Int @id @default(autoincrement())
-
-  teacher   Teachers @relation(fields: [teacherId], references: [id])
-  teacherId Int
-
-  discipline   Disciplines @relation(fields: [disciplineId], references: [id])
-  disciplineId Int
-
-  Tests Tests[]
-  @@map("teachersdisciplines")
-}
-
-model Teachers {
-  id Int @id @default(autoincrement())
-
-  name String @unique
-
-  TeachersDisciplines TeachersDisciplines[]
   @@map("teachers")
 }
 
-model Disciplines {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+model Term {
+  id          Int          @id @default(autoincrement())
+  number      Int          @unique
+  disciplines Discipline[]
 
-  term   Terms @relation(fields: [termId], references: [id])
-  termId Int
+  @@map("terms")
+}
 
-  TeachersDisciplines TeachersDisciplines[]
+model Discipline {
+  id                 Int                 @id @default(autoincrement())
+  name               String              @unique
+  term               Term                @relation(fields: [termId], references: [id])
+  termId             Int
+  teacherDisciplines TeacherDiscipline[]
+
   @@map("disciplines")
 }
 
-model Terms {
-  id     Int @id @default(autoincrement())
-  number Int @unique
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  tests Test[]
 
-  Disciplines Disciplines[]
-  @@map("terms")
+  @@map("categories")
+}
+
+model TeacherDiscipline {
+  id           Int        @id @default(autoincrement())
+  teacher      Teacher    @relation(fields: [teacherId], references: [id])
+  teacherId    Int
+  discipline   Discipline @relation(fields: [disciplineId], references: [id])
+  disciplineId Int
+  tests        Test[]
+}
+
+model Test {
+  id                  Int               @id @default(autoincrement())
+  name                String
+  pdfUrl              String
+  category            Category          @relation(fields: [categoryId], references: [id])
+  categoryId          Int
+  teacherDiscipline   TeacherDiscipline @relation(fields: [teacherDisciplineId], references: [id])
+  teacherDisciplineId Int
+
+  @@map("tests")
 }
