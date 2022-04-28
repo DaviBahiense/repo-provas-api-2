@@ -1,6 +1,5 @@
 import { User } from "@prisma/client";
 import bcrypt from "bcrypt";
-import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import userRepository from "../repositories/userRepository.js";
 import {
@@ -8,7 +7,6 @@ import {
   notFoundError,
   unauthorizedError,
 } from "../utils/errorUtils.js";
-dotenv.config();
 
 export type CreateUserData = Omit<User, "id">;
 

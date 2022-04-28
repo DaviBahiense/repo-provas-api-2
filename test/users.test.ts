@@ -1,67 +1,95 @@
-import { prisma } from "../src/database.js";
 import supertest from "supertest";
-import app from "../src/app.js";
-import { createUser } from "./factories/userFactory.js";
+import app from "../src/app";
+import { prisma } from "../src/database.js";
+import userBodyFactory from "./factories/userBodyFactory";
+import userFactory from "./factories/userFactory";
 
-describe("POST /sign-up",  () => {
+describe("User tests - POST /sign-up", () => {
+  beforeEach(truncateUsers);
 
-  beforeEach(async () => {
-    await prisma.$executeRaw`TRUMCATE TABLE users`
-  })
+  afterAll(disconnect);
 
-  afterAll(async () => {
-    await prisma.$disconnect
-  })
+  it("should return 201 and persist the user given a valid body", async () => {
+    const body = userBodyFactory();
 
-    it.todo("should return 201 and persist", async () => {
-
-    const user = await createUser()
-
-    const response = await supertest(app).post("/sign-up").send(user)
-
-    const newUser = await prisma.user.findUnique({
+    const response = await supertest(app).post("/sign-up").send(body);
+    const user = await prisma.user.findUnique({
       where: {
-        email: user.email
-      }
-    })
+        email: body.email, 
+      }, 
+    });
 
-    expect(response.status).toBe(201);
+    expect(response.status).toEqual(201);
     expect(user).not.toBeNull();
-    });
-  
-    it.todo("should return 422 a invalid body", async () => {
-      const body = {};
-
-      const response = await supertest(app).post("/sign-up").send(body)
-
-      expect(response.status).toEqual(422)
-    });
-
-    it.todo("should return 409 given duplicate email", async () => {
-      await supertest(app).post("/sign-up").send(createUser)
-      const response = await supertest(app).post("/sign-up").send(createUser)
-      const user = createUser()
-      const body = await prisma.user.findMany({
-        where:{
-          email:(await user).email
-        }
-      })
-
-      expect(response.status).toBe(409);
-      expect(body.length).toEqual(1);
-    });
-  
-   
   });
 
-describe("POST /sign-in", () => {
-it("returns true for valid params", () => {
-    // Aqui vai o código desse teste
+  it("should return 422 given a invalid body", async () => {
+    const body = {};
+
+    const response = await supertest(app).post("/sign-up").send(body);
+
+    expect(response.status).toEqual(422);
+  });
+
+  it("should return 409 given a duplicate email", async () => {
+    const body = userBodyFactory();
+
+    await supertest(app).post("/sign-up").send(body);
+    const response = await supertest(app).post("/sign-up").send(body);
+    const users = await prisma.user.findMany({
+      where: {
+        email: body.email,
+      },
+    });
+
+    expect(response.status).toEqual(409);
+    expect(users.length).toEqual(1);
+  });
 });
 
-it("returns false for invalid params", () => {
-    // Aqui vai o código desse teste
+describe("User tests - POST /sign-in", () => {
+  beforeEach(truncateUsers);
+
+  afterAll(disconnect);
+
+  it("should return 200 and a token given valid credentials", async () => {
+    const body = userBodyFactory();
+    await userFactory(body);
+
+    const response = await supertest(app).post("/sign-in").send(body);
+
+    expect(response.status).toEqual(200);
+    expect(typeof response.body.token).toEqual("string");
+    expect(response.body.token.length).toBeGreaterThan(0);
+  });
+
+  it("should return 401 given invalid email", async () => {
+    const body = userBodyFactory();
+
+    const response = await supertest(app).post("/sign-in").send(body);
+
+    expect(response.status).toEqual(401);
+  });
+
+  it("should return 401 given invalid password", async () => {
+    const body = userBodyFactory();
+    await userFactory(body);
+
+    const response = await supertest(app)
+      .post("/sign-in")
+      .send({
+        ...body,
+        password: "alo",
+      });
+
+    expect(response.status).toEqual(401);
+  });
 });
 
+async function disconnect() {
+  await prisma.$disconnect();
+}
 
-});
+async function truncateUsers() {
+  await prisma.$executeRaw`TRUNCATE TABLE users;`;
+}

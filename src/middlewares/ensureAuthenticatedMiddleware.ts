@@ -1,9 +1,7 @@
-import dotenv from "dotenv";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import userService from "../services/userService.js";
 import { unauthorizedError } from "../utils/errorUtils.js";
-dotenv.config();
 
 export async function ensureAuthenticatedMiddleware(
   req: Request,

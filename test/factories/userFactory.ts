@@ -1,20 +1,12 @@
-import { faker } from '@faker-js/faker';
-import { prisma } from "../../src/database.js";
 import bcrypt from "bcrypt";
+import { prisma } from "../../src/database.js";
+import { CreateUserData } from "../../src/services/userService.js";
 
-
-export async function createUser () {
-    const user = {
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-    };
-  
-    const insertedUser = await prisma.user.create({
-          data: {
-              email: user.email,
-              password: user.password
-          }
-      });
-  
-    return insertedUser;
-  } 
+export default async function userFactory(user: CreateUserData) {
+  await prisma.user.create({
+    data: {
+      ...user,
+      password: bcrypt.hashSync(user.password, 10),
+    },
+  });
+}

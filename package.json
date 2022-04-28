@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/app.ts",
-    "test": "NODE_OPTIONS=--experimental-vm-modules dotenv-cli -e .env.test jest -i",
+    "test": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -i",
     "migrate": "dotenv -e .env.test prisma migrate dev" 
   },
   "keywords": [],
@@ -42,5 +42,8 @@
     "joi": "^17.6.0",
     "jsonwebtoken": "^8.5.1",
     "pg": "^8.7.3"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }
