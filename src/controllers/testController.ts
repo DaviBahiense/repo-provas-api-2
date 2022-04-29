@@ -12,6 +12,15 @@ async function find(req: Request, res: Response) {
   res.send({ tests });
 }
 
+async function create(req: Request, res: Response) {
+  const data = req.body
+
+  await testService.create( data );
+  
+  res.sendStatus(201);
+}
+
 export default {
   find,
+  create
 };

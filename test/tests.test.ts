@@ -45,7 +45,7 @@ describe("User tests - POST /sign-up", () => {
     expect(response.status).toEqual(409);
     expect(users.length).toEqual(1);
   });
-});
+});   
 
 describe("User tests - POST /sign-in", () => {
   beforeEach(truncateUsers);
@@ -57,7 +57,7 @@ describe("User tests - POST /sign-in", () => {
     await userFactory(body);
 
     const response = await supertest(app).post("/sign-in").send(body);
-
+ 
     expect(response.status).toEqual(200);
     expect(typeof response.body.token).toEqual("string");
     expect(response.body.token.length).toBeGreaterThan(0);
@@ -73,7 +73,7 @@ describe("User tests - POST /sign-in", () => {
 
   it("should return 401 given invalid password", async () => {
     const body = userBodyFactory();
-    await userFactory(body);
+    await userFactory(body); 
 
     const response = await supertest(app)
       .post("/sign-in")

@@ -1,7 +1,6 @@
 import { prisma } from "../src/database.js";
 
 async function main() {
-    console.log("alooo")
     await prisma.teacher.createMany({
         data:[
             { name: "Pedrão" },
