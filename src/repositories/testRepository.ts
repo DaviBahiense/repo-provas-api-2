@@ -20,7 +20,7 @@ async function getTestsByDiscipline() {
       },
     },
   });
-}
+} 
 
 async function getTestsByTeachers() {
   return prisma.teacherDiscipline.findMany({
