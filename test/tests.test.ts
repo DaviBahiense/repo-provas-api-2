@@ -86,10 +86,72 @@ describe("User tests - POST /sign-in", () => {
   });
 });
 
+describe("GET tests /tests", () => {
+  beforeEach(truncateUsers)
+
+  afterAll(disconnect)
+
+  it("should return 401 whith a invalid credentials", async () => {
+    
+    const data = {};
+
+    const response = await supertest(app)
+      .get("/tests")
+      .send(data)
+      .set("Authorization", "123.123.123");
+
+    expect(response.status).toEqual(401);
+  })
+
+  it("should return object with a valid token", async () => {
+
+    const data = {}
+
+    const body = userBodyFactory();
+    await userFactory(body); 
+    const siginIn = await supertest(app).post("/sign-in").send(body);
+  
+    const response = await supertest(app)
+    .get("/tests?groupBy=teachers" || "/tests?groupBy=disciplines" )
+    .send(data)
+    .set("Authorization", siginIn.body.token);
+
+    expect(response.status).toEqual(200);
+
+    expect(typeof siginIn.body.token).toEqual("string");
+    expect(siginIn.body.token.length).toBeGreaterThan(0); 
+  })
+})
+
+describe("POST tests / tests", () => {
+  beforeEach(truncateUsers)
+  beforeEach(truncateTests)
+
+  afterAll(disconnect)
+
+  it("should return 201 when create a new test", async () =>{
+
+    const body = {name: "prova", pdfUrl: "www.google.com", categoryId: 1, teacherDisciplineId: 1}
+
+    const user = userBodyFactory();
+    await userFactory(user); 
+    const siginIn = await supertest(app).post("/sign-in").send(user);
+
+    const response = await supertest(app).post("/tests").send(body)
+
+    expect(response.status).toEqual(201);
+
+  })
+})
+
 async function disconnect() {
   await prisma.$disconnect();
 }
 
 async function truncateUsers() {
   await prisma.$executeRaw`TRUNCATE TABLE users;`;
+}
+
+async function truncateTests() {
+  await prisma.$executeRaw`TRUNCATE TABLE tests;`;
 }
